@@ -46,15 +46,9 @@ async def help(ctx: commands.Context):
         title=f"How do I use J.A.R.V.I.S.?", 
         description=f"Using Jarvis is easy! Simply enter a message starting with `jarvis`, and Jarvis will respond as if it's a command!\n**For example:**\n```ansi\n\u001b[0;40;36mjarvis, hack into the mainframe\n```\n**Would return:**\n```ansi\n\u001b[0;40;31mhacking into the mainframe\n```\nJarvis also protects against mentioning users, so you don't have to worry about the bot double pinging, or mentioning @everyone.\n\nNeed help? Found a bug? Join [my server](<https://discord.gg/ADMajgMsDX>) and I'll help you out!").set_author(name=ctx.author.display_name, icon_url=ctx.author.display_avatar.url)
     await ctx.reply(mention_author=False, embed=embed)
-
-# Check for the delete command
-def indms_or_hasperms(ctx: commands.Context):
-    if isinstance(ctx.channel, discord.channel.DMChannel):
-        return True
-    return ctx.channel.permissions_for(ctx.message.author).manage_messages
     
 @bot.hybrid_command(name="delete", description="Delete JARVIS' messages!")
-@commands.check(indms_or_hasperms)
+@commands.check_any(commands.has_permissions(manage_messages=True), commands.dm_only())
 async def delete(ctx: commands.Context, count: int):
     await ctx.reply(f"Deleting {count} messages!", mention_author=False, ephemeral=True)
     messages = []
@@ -70,7 +64,7 @@ async def delete(ctx: commands.Context, count: int):
                 messages.pop(0)
 
 @bot.hybrid_command(name="echo", with_app_command=True, description="Send a message to another channel through the bot!")
-@commands.check(indms_or_hasperms)
+@commands.has_permissions(manage_messages=True)
 @commands.guild_only()
 async def echo(ctx: commands.Context, channel: discord.TextChannel, *, msg: str, attachment: typing.Optional[discord.Attachment] = None):
     if attachment != None:
